@@ -2,11 +2,14 @@
 <resources>
 
     <string name="app_name">PDM_Serie1</string>
+    <string name="curr_semester">Current Semester</string>
+    <string name="noSemester">No Semester set</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="button_classes">Classes</string>
     <string name="button_semesters">Semesters</string>
     <string name="title_activity_semesters">SemestersActivity</string>
     <string name="text_semesters">Semesters</string>
+    <string name="title_activity_semester_classes">SemesterClassesActivity</string>
 
 </resources>

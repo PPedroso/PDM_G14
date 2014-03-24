@@ -8,6 +8,7 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends ListActivity {
 
@@ -21,7 +22,6 @@ public class MainActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-	
 	}
 
 	@Override
@@ -31,10 +31,14 @@ public class MainActivity extends ListActivity {
 		return true;
 	}
 	
-	
 	public void launchSemesterActivity(View view){
 		Intent intent = new Intent(this,SemestersActivity.class);
 		startActivityForResult(intent,SEMESTERS_ACTIVITY_CODE);
+	}
+	
+	public void launchSemesterClassesActivity(View view){
+		Intent intent = new Intent(this, SemesterClassesActivity.class);
+		startActivityForResult(intent,CLASSES_ACTIVITY_CODE);
 	}
 	
 	@Override
@@ -42,6 +46,7 @@ public class MainActivity extends ListActivity {
 		if(resultCode == RESULT_OK){
 			if(requestCode == SEMESTERS_ACTIVITY_CODE){
 					currentSemester = data.getStringExtra("SemesterInfo");
+
 					//Stores the selected semester
 			}
 			else if(resultCode == CLASSES_ACTIVITY_CODE){

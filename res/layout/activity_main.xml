@@ -34,6 +34,7 @@
         android:layout_alignBottom="@+id/button_semesters"
         android:layout_alignRight="@+id/@android:id/list"
         android:layout_marginRight="41dp"
-        android:text="@string/button_classes" />
+        android:text="@string/button_classes" 
+        android:onClick="launchSemesterClassesActivity"/>
 
 </RelativeLayout>

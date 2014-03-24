@@ -15,9 +15,12 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -34,12 +37,21 @@ public class SemestersActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_semesters);
 		
+		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
 		final ListView list = getListView();
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
+				Editor edit = sharedPrefs.edit();
+				if(sharedPrefs.contains("currentSemester")){
+					edit.remove("currentSemester");
+				}
+				edit.putString("currentSemester", list.getItemAtPosition(position).toString());
+				edit.apply();
+				
 				semestersCallback(list.getItemAtPosition(position).toString());
 			}
 		});
