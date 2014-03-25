@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,11 +20,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -117,16 +122,30 @@ public class SemesterClassesActivity extends Activity {
 				pb.setVisibility(View.GONE);
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_multiple_choice,currentClasses.keySet().toArray(new String[] { }));
 				lv.setAdapter(adapter);
+				
 			}
 		}.execute();
 	}
 
 	@Override
-	public void onStop(){
-		ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);
+	public void onPause(){
+		super.onPause();
 		
+		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);		
+		SparseBooleanArray items = lv.getCheckedItemPositions();
+		Map<String, String> selectedClasses = new HashMap<String, String>();
 		
-		//TODO:Adicionar um OnItemClickListener á lista para poder guardar/eliminar turmas da lista de turmas seleccionadas.  
+		for(int i = 0; i<lv.getCount(); i++){
+			if(items.get(i)){				
+				String name = lv.getItemAtPosition(i).toString();
+				String link = currentClasses.get(name);				
+			}
+		}
+		
+		Editor editor = sharedPrefs.edit();
+		
+		//Como é que se vai guardar as turmas?
 	}
 	
 	@Override

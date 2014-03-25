@@ -52,7 +52,7 @@ public class SemestersActivity extends ListActivity {
 				edit.putString("currentSemester", list.getItemAtPosition(position).toString());
 				edit.apply();
 				
-				semestersCallback(list.getItemAtPosition(position).toString());
+				finish();
 			}
 		});
 		getInfo();
@@ -63,14 +63,6 @@ public class SemestersActivity extends ListActivity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.semesters, menu);
 		return true;
-	}
-	
-	//Returns the value of the semester back to the main activity
-	private void semestersCallback(String semester){
-		Intent intent = new Intent();
-		intent.putExtra("SemesterInfo", semester);
-		setResult(RESULT_OK,intent);
-		finish();
 	}
 	
 	//Gathers the information relative to the semesters and puts it on the listview

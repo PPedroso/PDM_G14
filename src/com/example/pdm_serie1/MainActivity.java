@@ -33,26 +33,12 @@ public class MainActivity extends ListActivity {
 	
 	public void launchSemesterActivity(View view){
 		Intent intent = new Intent(this,SemestersActivity.class);
-		startActivityForResult(intent,SEMESTERS_ACTIVITY_CODE);
+		startActivity(intent);
 	}
 	
 	public void launchSemesterClassesActivity(View view){
 		Intent intent = new Intent(this, SemesterClassesActivity.class);
-		startActivityForResult(intent,CLASSES_ACTIVITY_CODE);
+		startActivity(intent);
 	}
 	
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data){
-		if(resultCode == RESULT_OK){
-			if(requestCode == SEMESTERS_ACTIVITY_CODE){
-					currentSemester = data.getStringExtra("SemesterInfo");
-
-					//Stores the selected semester
-			}
-			else if(resultCode == CLASSES_ACTIVITY_CODE){
-				//NOT IMPLEMENTED
-				//Store the list of chosen classes and update the ListView
-			}
-		}
-	}
 }
