@@ -69,6 +69,13 @@ public class SemestersActivity extends ListActivity {
 	public void getInfo(){
 		final Activity act = this;
 		a = new AsyncTask<String, Integer, LinkedList<String>>(){
+			/*
+			 	Possivel alternativa:
+		 		antes de passar para JsonArray, usar antes
+		 		JsonObject obj = new JsonObjectHttpExecuter()
+	 									.executeGet("http://thoth.cc.e.ipl.pt/api/v1/lectivesemesters", 200);
+			 	JsonArray = obj.getJSONArray("lectiveSemesters");
+			 */
 			@Override
 			protected LinkedList<String> doInBackground(String ... params){
 				try {
