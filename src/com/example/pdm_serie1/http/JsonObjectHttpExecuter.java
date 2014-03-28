@@ -19,7 +19,7 @@ public class JsonObjectHttpExecuter extends AbstractHttpExecuter<JSONObject>{
 			}
 			return new JSONObject(builder.toString());
 		} catch(IOException e) {
-			throw new ParseBodyException("Unexpected error while reading body contetn", e);
+			throw new ParseBodyException("Unexpected error while reading body content", e);
 		} catch(JSONException e) {
 			throw new ParseBodyException("Unexpected error while parsing body content to JSON object", e);			
 		}

@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
@@ -154,5 +155,24 @@ public class SemesterClassesActivity extends Activity {
 		getMenuInflater().inflate(R.menu.semester_classes, menu);
 		return true;
 	}
-
+	
+	@Override
+	public void onStop(){
+		super.onStop();
+		
+		ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);
+		SparseBooleanArray a = lv.getCheckedItemPositions();
+		LinkedList<String> resultList = new LinkedList<String>();
+		int resultCount = lv.getAdapter().getCount();
+		
+		for(int i=0; i<resultCount ;++i){
+			if(a.get(i)){
+				resultList.add(lv.getItemAtPosition(i).toString());
+			}
+		}
+		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		Editor e = sharedPrefs.edit();
+		e.putString("classesList", resultList.toString());
+		e.apply();
+	}
 }

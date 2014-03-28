@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.ListActivity;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
@@ -26,7 +25,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 
 public class SemestersActivity extends ListActivity {
@@ -51,11 +49,10 @@ public class SemestersActivity extends ListActivity {
 				}
 				edit.putString("currentSemester", list.getItemAtPosition(position).toString());
 				edit.apply();
-				
 				finish();
 			}
 		});
-		getInfo();
+		getInfoAndUpdateListView();
 	}
 
 	@Override
@@ -66,7 +63,7 @@ public class SemestersActivity extends ListActivity {
 	}
 	
 	//Gathers the information relative to the semesters and puts it on the listview
-	public void getInfo(){
+	public void getInfoAndUpdateListView(){
 		final Activity act = this;
 		a = new AsyncTask<String, Integer, LinkedList<String>>(){
 			/*
@@ -116,8 +113,15 @@ public class SemestersActivity extends ListActivity {
 			@Override
 			protected void onPostExecute(LinkedList<String> result){				
 				ListView lv = (ListView)findViewById(android.R.id.list);
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_1,result.toArray(new String[] { }));
-				lv.setAdapter(adapter);
+				try{
+					ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_1,result.toArray(new String[] { }));
+					lv.setAdapter(adapter);
+				}
+				catch(Exception e)
+				{
+					e.getMessage();
+				}
+				
 			}
 		}.execute();
 	}
