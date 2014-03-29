@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.ListActivity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
@@ -98,7 +99,6 @@ public class SemesterClassesActivity extends Activity {
 							String link = links.getString("self");
 							fetchedClasses.put(fullName, link);
 						}
-						
 					}
 					
 					return fetchedClasses;
@@ -127,27 +127,6 @@ public class SemesterClassesActivity extends Activity {
 			}
 		}.execute();
 	}
-
-	@Override
-	public void onPause(){
-		super.onPause();
-		
-		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);		
-		SparseBooleanArray items = lv.getCheckedItemPositions();
-		Map<String, String> selectedClasses = new HashMap<String, String>();
-		
-		for(int i = 0; i<lv.getCount(); i++){
-			if(items.get(i)){				
-				String name = lv.getItemAtPosition(i).toString();
-				String link = currentClasses.get(name);				
-			}
-		}
-		
-		Editor editor = sharedPrefs.edit();
-		
-		//Como é que se vai guardar as turmas?
-	}
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,10 +135,7 @@ public class SemesterClassesActivity extends Activity {
 		return true;
 	}
 	
-	@Override
-	public void onStop(){
-		super.onStop();
-		
+	public void confirmSelection(View view){
 		ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);
 		SparseBooleanArray a = lv.getCheckedItemPositions();
 		LinkedList<String> resultList = new LinkedList<String>();
@@ -170,9 +146,15 @@ public class SemesterClassesActivity extends Activity {
 				resultList.add(lv.getItemAtPosition(i).toString());
 			}
 		}
-		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		Editor e = sharedPrefs.edit();
-		e.putString("classesList", resultList.toString());
-		e.apply();
+
+		Intent intent = new Intent();
+		intent.putExtra("classesList",resultList.toString());
+		setResult(RESULT_OK,intent);
+		finish();
+	}
+	
+	@Override
+	public void onStop(){
+		super.onStop();
 	}
 }

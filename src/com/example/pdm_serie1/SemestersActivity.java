@@ -44,9 +44,6 @@ public class SemestersActivity extends ListActivity {
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
 				Editor edit = sharedPrefs.edit();
-				if(sharedPrefs.contains("currentSemester")){
-					edit.remove("currentSemester");
-				}
 				edit.putString("currentSemester", list.getItemAtPosition(position).toString());
 				edit.apply();
 				finish();
