@@ -19,7 +19,12 @@ import android.widget.ListView;
 
 public class MainActivity extends ListActivity {
 	
+	private String THOTH_API = "http://thoth.cc.e.ipl.pt/api/v1";
+	
+	//Constants for startActivityForResult
 	final private int CLASSES_LIST = 0;
+	
+	//Constants for context menu
 	final private int MENU_CLASS_INFO = 0;
 	final private int MENU_ASSIGNMENTS = 1;
 		
@@ -61,7 +66,9 @@ public class MainActivity extends ListActivity {
 	}
 	
 	
-	//Construct URI and call the browser
+	/**
+	 * Construct the URI and call the browser
+	 */
 	private void showClassInfo(String[] info){
 		String uri = ("http://thoth.cc.e.ipl.pt/classes/" + info[0] + "/" + info[1] + "/" + info[2] + "/info").replace(" ", "");
 		Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -72,21 +79,38 @@ public class MainActivity extends ListActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 	AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+	ListView lv;
+	AdapterView.AdapterContextMenuInfo acmi;
 	switch (item.getItemId()) {
-	    case MENU_CLASS_INFO:
+	
+		//Show class homepage
+		case MENU_CLASS_INFO:
 	        
-	    	ListView lv = getListView();
-	    	AdapterView.AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) info;
+	    	lv = getListView();
+	    	acmi = (AdapterContextMenuInfo) info;
 	    	String[] s = lv.getItemAtPosition(acmi.position).toString().split("/");
 	    	showClassInfo(s);
 	        
 	        return true;
-	    case MENU_ASSIGNMENTS:
-	        //TODO
+	    
+	    //Show assignment list for the specified class
+		case MENU_ASSIGNMENTS:
+			lv = getListView();
+	    	acmi= (AdapterContextMenuInfo) info;
+	    	String classId = lv.getItemAtPosition(acmi.position).toString();
+	    	classId = classId.substring(0,classId.indexOf(":")).replace(" ", "");
+	    	launchAssignmentActivity(classId);
+			
 	        return true;
 	    default:
 	        return super.onContextItemSelected(item);
 	   }
+	}
+	
+	public void launchAssignmentActivity(String classId){
+		Intent intent = new Intent(MainActivity.this,AssignmentActivity.class);
+		intent.putExtra("classId",classId);
+		startActivity(intent);
 	}
 	
 	public void launchSemesterActivity(View view){
@@ -112,7 +136,6 @@ public class MainActivity extends ListActivity {
 				e.apply();
 								
 				ListView lv = getListView();
-				
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,classesList);
 				lv.setAdapter(adapter);
 				

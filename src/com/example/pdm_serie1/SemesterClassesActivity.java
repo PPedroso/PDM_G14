@@ -32,11 +32,12 @@ import android.widget.TextView;
 
 public class SemesterClassesActivity extends Activity {
 
+	private String THOTH_API = "http://thoth.cc.e.ipl.pt/api/v1";
 	String currentSemester = "";
 	boolean semesterIsSet = false;
-	Map<String, String> currentClasses;
+	LinkedList<String> currentClasses;
 	
-	AsyncTask<String, Integer, Map<String, String>> a;
+	AsyncTask<String, Integer, LinkedList<String>> a;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,18 +57,19 @@ public class SemesterClassesActivity extends Activity {
 	}
 	
 	/**
-	 * Creates a background task that gets all classes for the set semester. Will not do anything if semester is not set.
+	 * Creates a background task that gets all classes for the set semester. 
+	 * Will not do anything if semester is not set.
 	 */
 	public void getClasses(){
 		final Activity act = this;
 		
 		if(!semesterIsSet) return;
 		
-		a = new AsyncTask<String, Integer, Map<String, String>>(){
+		a = new AsyncTask<String, Integer, LinkedList<String>>(){
 			@Override
-			protected Map<String, String> doInBackground(String ... params){
+			protected LinkedList<String> doInBackground(String ... params){
 				try {
-					InputStream is = new URL("http://thoth.cc.e.ipl.pt/api/v1/classes").openStream();
+					InputStream is = new URL(THOTH_API+"/classes").openStream();
 											
 					BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
 				    
@@ -79,7 +81,7 @@ public class SemesterClassesActivity extends Activity {
 				    is.close();
 				    rd.close();
 				    
-				    Map<String, String> fetchedClasses = new HashMap<String, String>();
+				    LinkedList<String> classesList= new LinkedList<String>();
 					
 					JSONArray jArray = new JSONObject(sb.toString()).getJSONArray("classes");
 					
@@ -89,13 +91,13 @@ public class SemesterClassesActivity extends Activity {
 						
 						if(lectiveSemester.compareTo(currentSemester) == 0){
 							String fullName = (String)((JSONObject)jArray.get(i)).get("fullName");
-							JSONObject links = (JSONObject) ((JSONObject)jArray.get(i)).get("_links");
-							String link = links.getString("self");
-							fetchedClasses.put(fullName, link);
+							String id =(((JSONObject)jArray.get(i)).get("id")).toString();
+							String finalString = id + ":"  + fullName;
+							classesList.add(finalString);
 						}
 					}
 					
-					return fetchedClasses;
+					return classesList;
 				    
 				} catch (MalformedURLException e) {
 					Log.i("URL","URL malformed");
@@ -110,12 +112,12 @@ public class SemesterClassesActivity extends Activity {
 			}
 						
 			@Override
-			protected void onPostExecute(Map<String, String> result){				
+			protected void onPostExecute(LinkedList<String> result){				
 				currentClasses = result;
 				ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);
 				ProgressBar pb = (ProgressBar)findViewById(R.id.SemesterClassesActivity_ProgressBar);
 				pb.setVisibility(View.GONE);
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_multiple_choice,currentClasses.keySet().toArray(new String[] { }));
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_multiple_choice,currentClasses.toArray(new String[] {}));
 				lv.setAdapter(adapter);
 				
 			}
@@ -145,10 +147,5 @@ public class SemesterClassesActivity extends Activity {
 		intent.putExtra("classesList",resultList.toString());
 		setResult(RESULT_OK,intent);
 		finish();
-	}
-	
-	@Override
-	public void onStop(){
-		super.onStop();
 	}
 }

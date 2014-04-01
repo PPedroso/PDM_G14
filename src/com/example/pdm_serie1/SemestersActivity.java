@@ -30,6 +30,8 @@ import android.widget.ListView;
 public class SemestersActivity extends ListActivity {
 
 	AsyncTask<String, Integer, LinkedList<String>> a;
+	private String THOTH_API = "http://thoth.cc.e.ipl.pt/api/v1";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -73,7 +75,7 @@ public class SemestersActivity extends ListActivity {
 			@Override
 			protected LinkedList<String> doInBackground(String ... params){
 				try {
-					InputStream is = new URL("http://thoth.cc.e.ipl.pt/api/v1/lectivesemesters").openStream();
+					InputStream is = new URL(THOTH_API + "/lectivesemesters").openStream();
 											
 					BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
 				    

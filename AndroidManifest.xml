@@ -33,6 +33,10 @@
             android:name="com.example.pdm_serie1.SemesterClassesActivity"
             android:label="@string/title_activity_semester_classes" >
         </activity>
+        <activity
+            android:name="com.example.pdm_serie1.AssignmentActivity"
+            android:label="@string/title_activity_assignment" >
+        </activity>
     </application>
 
 </manifest>
