@@ -67,7 +67,6 @@ public class AssignmentActivity extends Activity {
 					
 					for(int i=0;i<a.length();++i){
 						resultList.add(((JSONObject)a.get(i)).get("title").toString());
-						++i;
 					}
 					
 					return resultList;
