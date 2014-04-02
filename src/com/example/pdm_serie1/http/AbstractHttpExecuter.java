@@ -21,7 +21,7 @@ public abstract class AbstractHttpExecuter<T> implements IHttpExecuter<T> {
 
 	@Override
 	public T executeGet(String url, int expectedStatusCode) throws MyHttpException {
-		return executeGet(url, expectedStatusCode);
+		return executeGet(url, expectedStatusCode, (Header[])null);
 	}
 
 	@Override
@@ -29,8 +29,10 @@ public abstract class AbstractHttpExecuter<T> implements IHttpExecuter<T> {
 		HttpClient client = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(url);
 		BufferedReader reader = null;
-		for(Header header : headers) {
-			httpGet.addHeader(header);
+		if(headers != null) {
+			for(Header header : headers) {
+				httpGet.addHeader(header);
+			}
 		}
 		try {
 			HttpResponse response = client.execute(httpGet);

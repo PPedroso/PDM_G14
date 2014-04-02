@@ -1,4 +1,4 @@
-package com.example.pdm_serie1.http;
+package com.example.pdm_serie1.http.exectypes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.example.pdm_serie1.exceptions.ParseBodyException;
+import com.example.pdm_serie1.http.AbstractHttpExecuter;
 
 public class JsonObjectHttpExecuter extends AbstractHttpExecuter<JSONObject>{
 

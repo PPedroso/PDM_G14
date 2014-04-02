@@ -1,25 +1,18 @@
 package com.example.pdm_serie1;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.LinkedList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -27,11 +20,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.pdm_serie1.asynchandlers.BasicAsyncTaskResult;
+import com.example.pdm_serie1.asynchandlers.IAsyncTaskResult;
+import com.example.pdm_serie1.exceptions.MyHttpException;
+import com.example.pdm_serie1.exceptions.UnexpectedStatusCodeException;
+import com.example.pdm_serie1.http.ThothEndPoints;
+import com.example.pdm_serie1.http.exectypes.JsonObjectHttpExecuter;
+
 public class SemestersActivity extends ListActivity {
 
-	AsyncTask<String, Integer, LinkedList<String>> a;
-	private String THOTH_API = "http://thoth.cc.e.ipl.pt/api/v1";
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,10 +38,8 @@ public class SemestersActivity extends ListActivity {
 		
 		final ListView list = getListView();
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position,
-					long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Editor edit = sharedPrefs.edit();
 				edit.putString("currentSemester", list.getItemAtPosition(position).toString());
 				edit.apply();
@@ -63,64 +58,53 @@ public class SemestersActivity extends ListActivity {
 	
 	//Gathers the information relative to the semesters and puts it on the listview
 	public void getInfoAndUpdateListView(){
-		final Activity act = this;
-		a = new AsyncTask<String, Integer, LinkedList<String>>(){
-			/*
-			 	Possivel alternativa:
-		 		antes de passar para JsonArray, usar antes
-		 		JsonObject obj = new JsonObjectHttpExecuter()
-	 									.executeGet("http://thoth.cc.e.ipl.pt/api/v1/lectivesemesters", 200);
-			 	JsonArray = obj.getJSONArray("lectiveSemesters");
-			 */
+		final Activity thisAct = this;
+		new AsyncTask<String, Integer, IAsyncTaskResult<LinkedList<String>>>(){
 			@Override
-			protected LinkedList<String> doInBackground(String ... params){
+			protected IAsyncTaskResult<LinkedList<String>> doInBackground(String ... params){
 				try {
-					InputStream is = new URL(THOTH_API + "/lectivesemesters").openStream();
-											
-					BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-				    
-					StringBuilder sb = new StringBuilder();
-				    int cp;
-				    while ((cp = rd.read()) != -1) {
-				      sb.append((char) cp);
-				    }
-				    is.close();
-				    rd.close();
-				    
+					JSONObject obj = new JsonObjectHttpExecuter().executeGet(ThothEndPoints.get().getSemesters(), 
+																			 200);
+					JSONArray arrayObj = obj.getJSONArray("lectiveSemesters");
 				    LinkedList<String> resultList = new LinkedList<String>();
-					
-					JSONArray a = new JSONObject(sb.toString()).getJSONArray("lectiveSemesters");
-					
-					for(int i=0;i<a.length();++i){
-						resultList.add((String)((JSONObject)a.get(i)).get("shortName"));
+				    for(int i=0;i<arrayObj.length();++i){
+						resultList.add((String)((JSONObject)arrayObj.get(i)).get("shortName"));
 					}
-					
-					return resultList;
-				    
-				} catch (MalformedURLException e) {
-					Log.i("URL","URL malformed");
-				} catch (IOException e) {
-					Log.i("IO", "IO Error");
+					return new BasicAsyncTaskResult<LinkedList<String>>(resultList);				
 				} catch (JSONException e) {
-					Log.i("JSON","JSON Exception");
-				} catch(Exception e){
-					Log.i("General Exception",e.getMessage());
+					Log.e("JSON", 
+						  "The parsing of GET request for all lective semesters isn't being handled propertly", 
+						  e);
+					return new BasicAsyncTaskResult<LinkedList<String>>(e);
+				} catch (MyHttpException e) {
+					if(e instanceof UnexpectedStatusCodeException) {
+						Log.e("HTTP", 
+							  String.format("The GET request to obtain the semesters list is returning is"
+									  	    + " returning % status instead of 200", 
+									  	    ((UnexpectedStatusCodeException)e).getRecievedStatusCode()),
+							  e);
+					} else {
+						Log.w("HTTP",
+						 	  "An error occured provoked by external causes occured while requesting"
+							  + " the list of semesters",
+							  e);
+					}
+					return new BasicAsyncTaskResult<LinkedList<String>>(e);
 				}
-				return null;
 			}
 						
 			@Override
-			protected void onPostExecute(LinkedList<String> result){				
+			protected void onPostExecute(IAsyncTaskResult<LinkedList<String>> asyncTaskResult){
+				if(asyncTaskResult.getError() != null) {
+					//TODO -> arranjar uma view para os erros
+					return;
+				}
 				ListView lv = (ListView)findViewById(android.R.id.list);
-				try{
-					ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_1,result.toArray(new String[] { }));
-					lv.setAdapter(adapter);
-				}
-				catch(Exception e)
-				{
-					e.getMessage();
-				}
-				
+				ArrayAdapter<String> adapter 
+						= new ArrayAdapter<String>(thisAct,
+	  											   android.R.layout.simple_list_item_1,
+												   asyncTaskResult.getResult().toArray(new String[] { }));
+				lv.setAdapter(adapter);
 			}
 		}.execute();
 	}
