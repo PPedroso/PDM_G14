@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,18 +25,19 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.pdm_serie1.adapters.CustomTextArrayAdapter;
+import com.example.pdm_serie1.adapters.CheckedListCustomTextArrayAdapter;
 import com.example.pdm_serie1.asynctaskrelated.BasicAsyncTaskResult;
 import com.example.pdm_serie1.asynctaskrelated.IAsyncTaskResult;
 import com.example.pdm_serie1.exceptions.MyHttpException;
 import com.example.pdm_serie1.exceptions.UnexpectedStatusCodeException;
 import com.example.pdm_serie1.http.ThothEndPoints;
 import com.example.pdm_serie1.http.exectypes.JsonObjectHttpExecuter;
+import com.example.pdm_serie1.model.IModelItem;
 import com.example.pdm_serie1.model.Semester;
 import com.example.pdm_serie1.model.TClass;
 import com.example.pdm_serie1.utils.ModelItemUtils;
 
-public class SemesterClassesActivity extends Activity {
+public class SemesterClassesActivity extends ListActivity {
 
 	private Semester currentSemester;
 	private ListView listView;
@@ -50,7 +52,7 @@ public class SemesterClassesActivity extends Activity {
 		confirmButton = (Button)findViewById(R.id.confirmButton);
 		confirmButton.setEnabled(false);
 		
-		listView = (ListView)findViewById(R.id.SemesterClasses_classList);
+		listView = getListView();
 		listView.setOnItemClickListener(new	OnItemClickListener(){
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -123,14 +125,15 @@ public class SemesterClassesActivity extends Activity {
 					Toast.makeText(act, "An unexpected error occured", Toast.LENGTH_SHORT).show();
 					return;
 				}
-				listView = (ListView)findViewById(R.id.SemesterClasses_classList);
 				ProgressBar pb = (ProgressBar)findViewById(R.id.SemesterClassesActivity_ProgressBar);
 				pb.setVisibility(View.GONE);
 				List<TClass> result = taskResult.getResult();
-				ArrayAdapter<TClass> adapter 
-						= new CustomTextArrayAdapter<TClass>(act, 
-														     android.R.layout.simple_list_item_multiple_choice, 
-														     result.toArray(new TClass[result.size()]));
+				ArrayAdapter<IModelItem> adapter 
+						= new CheckedListCustomTextArrayAdapter<TClass>(
+													 act, 
+												     android.R.layout.simple_list_item_multiple_choice, 
+												     result.toArray(new TClass[result.size()])
+												 );
 				listView.setAdapter(adapter);				
 			}
 		}.execute();

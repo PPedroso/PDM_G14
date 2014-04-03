@@ -19,13 +19,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.pdm_serie1.adapters.CustomTextArrayAdapter;
+import com.example.pdm_serie1.adapters.NormalListCustomTextArrayAdapter;
 import com.example.pdm_serie1.asynctaskrelated.BasicAsyncTaskResult;
 import com.example.pdm_serie1.asynctaskrelated.IAsyncTaskResult;
 import com.example.pdm_serie1.exceptions.MyHttpException;
 import com.example.pdm_serie1.exceptions.UnexpectedStatusCodeException;
 import com.example.pdm_serie1.http.ThothEndPoints;
 import com.example.pdm_serie1.http.exectypes.JsonObjectHttpExecuter;
+import com.example.pdm_serie1.model.IModelItem;
 import com.example.pdm_serie1.model.Semester;
 
 public class SemestersActivity extends ListActivity {
@@ -103,10 +104,12 @@ public class SemestersActivity extends ListActivity {
 				}
 				Semester[] result = asyncTaskResult.getResult();
 				ListView lv = (ListView)findViewById(android.R.id.list);
-				ArrayAdapter<Semester> adapter 
-						= new CustomTextArrayAdapter<Semester>(thisAct,
+				ArrayAdapter<IModelItem> adapter 
+						= new NormalListCustomTextArrayAdapter<Semester>(
+															   thisAct,
 				  											   android.R.layout.simple_list_item_1,
-															   result);
+															   result
+															);
 				lv.setAdapter(adapter);
 			}
 		}.execute();

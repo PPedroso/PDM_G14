@@ -5,13 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 import com.example.pdm_serie1.model.IModelItem;
 
-public class CustomTextArrayAdapter<T extends IModelItem> extends ArrayAdapter<T> {
+public abstract class CustomTextArrayAdapter<T extends IModelItem> extends ArrayAdapter<T> {
 
-	private T[] data;
+	protected T[] data;
 	private LayoutInflater inflater;
 	private int resource;
 	
@@ -28,8 +27,10 @@ public class CustomTextArrayAdapter<T extends IModelItem> extends ArrayAdapter<T
 		if(view == null) {
 			view = inflater.inflate(resource, null);
 		}
-		TextView textView = (TextView) view.findViewById(android.R.id.text1);
-		textView.setText(data[position].toListItemString());
+		changeText(position, view);
 		return view;
 	}
+	
+	protected abstract void changeText(int position, View view);
+	
 }
