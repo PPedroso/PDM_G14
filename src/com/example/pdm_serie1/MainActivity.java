@@ -19,8 +19,6 @@ import android.widget.ListView;
 
 public class MainActivity extends ListActivity {
 	
-	private String THOTH_API = "http://thoth.cc.e.ipl.pt/api/v1";
-	
 	//Constants for startActivityForResult
 	final private int CLASSES_LIST = 0;
 	
@@ -141,6 +139,5 @@ public class MainActivity extends ListActivity {
 				
 			}
 		}
-	}
-	
+	}	
 }
