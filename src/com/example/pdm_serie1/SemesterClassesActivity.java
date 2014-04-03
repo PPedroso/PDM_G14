@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,19 +21,20 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.pdm_serie1.adapters.CheckedListCustomTextArrayAdapter;
+import com.example.pdm_serie1.adapters.CheckedListCustomInitAndTextArrayAdapter;
+import com.example.pdm_serie1.adapters.NormalListCustomTextArrayAdapter;
 import com.example.pdm_serie1.asynctaskrelated.BasicAsyncTaskResult;
 import com.example.pdm_serie1.asynctaskrelated.IAsyncTaskResult;
 import com.example.pdm_serie1.exceptions.MyHttpException;
 import com.example.pdm_serie1.exceptions.UnexpectedStatusCodeException;
 import com.example.pdm_serie1.http.ThothEndPoints;
 import com.example.pdm_serie1.http.exectypes.JsonObjectHttpExecuter;
-import com.example.pdm_serie1.model.IModelItem;
 import com.example.pdm_serie1.model.Semester;
 import com.example.pdm_serie1.model.TClass;
 import com.example.pdm_serie1.utils.ModelItemUtils;
@@ -42,6 +44,7 @@ public class SemesterClassesActivity extends ListActivity {
 	private Semester currentSemester;
 	private ListView listView;
 	private List<TClass> selectedClasses = new LinkedList<TClass>();
+	private List<TClass> initialClasses;
 	private Button confirmButton;
 	
 	@Override
@@ -50,13 +53,20 @@ public class SemesterClassesActivity extends ListActivity {
 		setContentView(R.layout.activity_semesterclasses);
 		
 		confirmButton = (Button)findViewById(R.id.confirmButton);
-		confirmButton.setEnabled(false);
+		String initialClassesStr = getIntent().getStringExtra("initialClasses");
+		
+		if(!initialClassesStr.equals("")) {
+			initialClasses = TClass.fromSharedPreferences(initialClassesStr.split(","));
+			selectedClasses.addAll(initialClasses);
+		} else {
+			confirmButton.setEnabled(false);	
+		}
 		
 		listView = getListView();
 		listView.setOnItemClickListener(new	OnItemClickListener(){
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				TClass thothClass = (TClass)listView.getItemAtPosition(position);
+				TClass thothClass = (TClass)listView.getItemAtPosition(position); 
 				if(listView.isItemChecked(position)) {
 					selectedClasses.add(thothClass);
 				} else {
@@ -128,12 +138,10 @@ public class SemesterClassesActivity extends ListActivity {
 				ProgressBar pb = (ProgressBar)findViewById(R.id.SemesterClassesActivity_ProgressBar);
 				pb.setVisibility(View.GONE);
 				List<TClass> result = taskResult.getResult();
-				ArrayAdapter<IModelItem> adapter 
-						= new CheckedListCustomTextArrayAdapter<TClass>(
-													 act, 
-												     android.R.layout.simple_list_item_multiple_choice, 
-												     result.toArray(new TClass[result.size()])
-												 );
+				ArrayAdapter<TClass> adapter = getClassAdapter(
+														act, 
+												   	    android.R.layout.simple_list_item_multiple_choice, 
+													    result.toArray(new TClass[result.size()]));
 				listView.setAdapter(adapter);				
 			}
 		}.execute();
@@ -145,5 +153,23 @@ public class SemesterClassesActivity extends ListActivity {
 		intent.putExtra("classesList", retStr);
 		setResult(RESULT_OK, intent);
 		finish();
+	}
+	
+	private ArrayAdapter<TClass> getClassAdapter(Context ctx, int resource, TClass[] data) {
+		if(initialClasses == null) {
+			return new NormalListCustomTextArrayAdapter<TClass>(ctx, resource, data);
+		}
+		return new CheckedListCustomInitAndTextArrayAdapter<TClass>(
+														 ctx, 
+													     android.R.layout.simple_list_item_multiple_choice, 
+													     data,
+													     initialClasses
+													 ) {
+				@Override
+				protected void changeText(int position, View view) {
+					CheckedTextView textView = (CheckedTextView) view.findViewById(android.R.id.text1);
+					textView.setText(data[position].toListItemString());									
+			}
+		};
 	}
 }

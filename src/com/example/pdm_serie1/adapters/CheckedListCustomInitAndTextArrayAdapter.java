@@ -5,20 +5,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.example.pdm_serie1.model.IModelItem;
 
-public abstract class CustomTextArrayAdapter<T extends IModelItem> extends ArrayAdapter<T> {
+public abstract class CheckedListCustomInitAndTextArrayAdapter<T extends IModelItem<T>> extends ArrayAdapter<T> {
 
 	protected T[] data;
 	private final LayoutInflater inflater;
+	private final Iterable<T> initialData;
 	private final int resource;
 	
-	public CustomTextArrayAdapter(Context context, int resource, T[] data) {
+	public CheckedListCustomInitAndTextArrayAdapter(Context context, int resource, T[] data, 
+												    Iterable<T> initialData) {
 		super(context, resource, data);
-		this.resource = resource;
 		this.data = data;
+		this.resource = resource;
 		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.initialData = initialData;
 	}
 
 	@Override
@@ -27,10 +31,21 @@ public abstract class CustomTextArrayAdapter<T extends IModelItem> extends Array
 		if(view == null) {
 			view = inflater.inflate(resource, parent, false);
 		}
+		if(verifyIfStartsChecked(getItem(position))) {
+			((ListView)parent).setItemChecked(position, true);
+		}
 		changeText(position, view);
 		return view;
 	}
 	
+	private boolean verifyIfStartsChecked(T currentT) {
+		for(T t : initialData) {
+			if(t.representsSameItem(currentT)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	protected abstract void changeText(int position, View view);
-	
 }

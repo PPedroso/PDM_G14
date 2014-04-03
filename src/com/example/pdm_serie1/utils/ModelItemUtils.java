@@ -6,7 +6,7 @@ import com.example.pdm_serie1.model.IModelItem;
 
 public class ModelItemUtils {
 
-	public static <T extends IModelItem> String concatIModelItemSharedPref(Iterable<T> iter, 
+	public static <T extends IModelItem<?>> String concatIModelItemSharedPref(Iterable<T> iter, 
 																		   String concatStr) {
 		Iterator<T> it = iter.iterator();
 		if(!it.hasNext()) {
@@ -14,7 +14,7 @@ public class ModelItemUtils {
 		}
 		StringBuilder builder = new StringBuilder(it.next().toSharedPreferencesString());
 		while(it.hasNext()) {
-			builder.append(concatStr).append(it.next());
+			builder.append(concatStr).append(it.next().toSharedPreferencesString());
 		}
 		return builder.toString();		
 	}

@@ -6,11 +6,9 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ListActivity;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -26,25 +24,25 @@ import com.example.pdm_serie1.exceptions.MyHttpException;
 import com.example.pdm_serie1.exceptions.UnexpectedStatusCodeException;
 import com.example.pdm_serie1.http.ThothEndPoints;
 import com.example.pdm_serie1.http.exectypes.JsonObjectHttpExecuter;
-import com.example.pdm_serie1.model.IModelItem;
 import com.example.pdm_serie1.model.Semester;
 
 public class SemestersActivity extends ListActivity {
 
+	private ListView list;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_semesters);
 		
-		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);		
-		final ListView list = getListView();
+		list = getListView();
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Editor edit = sharedPrefs.edit();
-				String str = ((Semester) list.getItemAtPosition(position)).toSharedPreferencesString();
-				edit.putString("currentSemester", str);
-				edit.apply();
+				Intent intent = new Intent();
+				String retStr = ((Semester) list.getItemAtPosition(position)).toSharedPreferencesString();
+				intent.putExtra("semester", retStr);
+				setResult(RESULT_OK, intent);
 				finish();
 			}
 		});
@@ -103,16 +101,13 @@ public class SemestersActivity extends ListActivity {
 					return;
 				}
 				Semester[] result = asyncTaskResult.getResult();
-				ListView lv = (ListView)findViewById(android.R.id.list);
-				ArrayAdapter<IModelItem> adapter 
-						= new NormalListCustomTextArrayAdapter<Semester>(
+				ArrayAdapter<Semester> adapter = new NormalListCustomTextArrayAdapter<Semester>(
 															   thisAct,
 				  											   android.R.layout.simple_list_item_1,
 															   result
 															);
-				lv.setAdapter(adapter);
+				list.setAdapter(adapter);
 			}
 		}.execute();
 	}
-
 }

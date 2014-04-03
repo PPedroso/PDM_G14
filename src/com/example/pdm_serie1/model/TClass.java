@@ -1,9 +1,12 @@
 package com.example.pdm_serie1.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class TClass implements IModelItem {
+public class TClass implements IModelItem<TClass> {
 
 	private final int id;
 	private final String fullName;
@@ -43,6 +46,14 @@ public class TClass implements IModelItem {
 						  fields[5]);
 	}
 	
+	public static List<TClass> fromSharedPreferences(String[] strArray) {
+		LinkedList<TClass> retList = new LinkedList<TClass>();
+		for(String str : strArray) {
+			retList.addLast(fromSharedPreferences(str));
+		}
+		return retList;
+	}
+	
 	public static TClass fromJSONObject(JSONObject jsonObj) throws JSONException {
 		return new TClass(jsonObj.getInt("id"),
 						  jsonObj.getString("fullName"),
@@ -50,6 +61,26 @@ public class TClass implements IModelItem {
 						  jsonObj.getString("lectiveSemesterShortName"),
 						  jsonObj.getString("className"),
 						  jsonObj.getString("mainTeacherShortName"));
+	}
+	
+	@Override
+	public boolean representsSameItem(TClass t) {
+		return this.getId() == t.getId();
+	}
+	
+	//Incompolete equals, no verificaion besides the initial, is made for NullPointerExceptions.
+	@Override
+	public boolean equals(Object arg) {
+		if(arg == null || !(arg instanceof TClass)) {
+			return false;
+		}
+		TClass other = (TClass) arg;
+		return this.id == other.id &&
+			   this.fullName.equals(other.fullName) &&
+			   this.courseUnitShortName.equals(other.courseUnitShortName) &&
+			   this.lectiveSemesterShortName.equals(other.lectiveSemesterShortName) &&
+			   this.className.equals(other.className) &&
+			   this.mainTeacherShortName.equals(other.mainTeacherShortName); 
 	}
 	
 	//------------------------------ Getters -------------------------------

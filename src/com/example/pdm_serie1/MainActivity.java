@@ -1,12 +1,14 @@
 package com.example.pdm_serie1;
 
-import android.net.Uri;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
+import java.util.List;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -17,30 +19,40 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.pdm_serie1.adapters.NormalListCustomTextArrayAdapter;
+import com.example.pdm_serie1.model.TClass;
+
 public class MainActivity extends ListActivity {
 	
 	//Constants for startActivityForResult
-	final private int CLASSES_LIST = 0;
+	private static final int CLASSES_LIST = 0;
+	private static final int SEMESTERS_LIST = 1; 
 	
 	//Constants for context menu
-	final private int MENU_CLASS_INFO = 0;
-	final private int MENU_ASSIGNMENTS = 1;
-		
+	private static final int MENU_CLASS_INFO = 0;
+	private static final int MENU_ASSIGNMENTS = 1;
+	
+	//list of selected classes
+	private List<TClass> selectedClasses;
+	
+	private ListView lv;
+	private SharedPreferences sharedPrefs;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		registerForContextMenu(getListView());
-		
-		final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
+		lv = getListView();
+		registerForContextMenu(lv);
+		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if(sharedPrefs.contains("classesList")){
-			final ListView lv = getListView();
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-									this,
-									android.R.layout.simple_list_item_1,
-									sharedPrefs.getString("classesList", "").replace("[", "").replace("]", "").split(",")
+			String[] classesAsStr = sharedPrefs.getString("classesList", "").split(",");
+			selectedClasses = TClass.fromSharedPreferences(classesAsStr);
+			ArrayAdapter<TClass> adapter = new NormalListCustomTextArrayAdapter<TClass>(
+										this,
+										android.R.layout.simple_list_item_1,
+										selectedClasses.toArray(new TClass[selectedClasses.size()])
 									);
 			lv.setAdapter(adapter);
 		}
@@ -55,12 +67,12 @@ public class MainActivity extends ListActivity {
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, 
-	   ContextMenuInfo menuInfo) {
+	    ContextMenuInfo menuInfo) {
 		
-	  //super.onCreateContextMenu(menu, v, menuInfo);    
-	  getMenuInflater().inflate(R.menu.context_menu, menu);
-	  menu.add(Menu.NONE, MENU_CLASS_INFO, Menu.NONE, "Info");
-	  menu.add(Menu.NONE, MENU_ASSIGNMENTS, Menu.NONE, "Assignments");
+		//super.onCreateContextMenu(menu, v, menuInfo);    
+		getMenuInflater().inflate(R.menu.context_menu, menu);
+		menu.add(Menu.NONE, MENU_CLASS_INFO, Menu.NONE, "Info");
+		menu.add(Menu.NONE, MENU_ASSIGNMENTS, Menu.NONE, "Assignments");
 	}
 	
 	
@@ -76,32 +88,28 @@ public class MainActivity extends ListActivity {
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-	AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-	ListView lv;
-	AdapterView.AdapterContextMenuInfo acmi;
-	switch (item.getItemId()) {
-	
-		//Show class homepage
-		case MENU_CLASS_INFO:
-	        
-	    	lv = getListView();
-	    	acmi = (AdapterContextMenuInfo) info;
-	    	String[] s = lv.getItemAtPosition(acmi.position).toString().split("/");
-	    	showClassInfo(s);
-	        
-	        return true;
-	    
-	    //Show assignment list for the specified class
-		case MENU_ASSIGNMENTS:
-			lv = getListView();
-	    	acmi= (AdapterContextMenuInfo) info;
-	    	String classId = lv.getItemAtPosition(acmi.position).toString();
-	    	classId = classId.substring(0,classId.indexOf(":")).replace(" ", "");
-	    	launchAssignmentActivity(classId);
-			
-	        return true;
-	    default:
-	        return super.onContextItemSelected(item);
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		AdapterView.AdapterContextMenuInfo acmi;
+		switch (item.getItemId()) {		
+			//Show class homepage
+			case MENU_CLASS_INFO: {
+		    	acmi = (AdapterContextMenuInfo) info;
+		    	String[] s = lv.getItemAtPosition(acmi.position).toString().split("/");
+		    	showClassInfo(s);
+		        
+		        return true;
+			}
+		    //Show assignment list for the specified class
+			case MENU_ASSIGNMENTS: {
+		    	acmi= (AdapterContextMenuInfo) info;
+		    	String classId = lv.getItemAtPosition(acmi.position).toString();
+		    	classId = classId.substring(0,classId.indexOf(":")).replace(" ", "");
+		    	launchAssignmentActivity(classId);				
+		        return true;
+			}
+		    default: {
+		        return super.onContextItemSelected(item);
+		    }
 	   }
 	}
 	
@@ -113,31 +121,38 @@ public class MainActivity extends ListActivity {
 	
 	public void launchSemesterActivity(View view){
 		Intent intent = new Intent(this,SemestersActivity.class);
-		startActivity(intent);
+		startActivityForResult(intent, SEMESTERS_LIST);
 	}
 	
 	public void launchSemesterClassesActivity(View view){
 		Intent intent = new Intent(this, SemesterClassesActivity.class);
-		startActivityForResult(intent,CLASSES_LIST);;
+		intent.putExtra("initialClasses", sharedPrefs.getString("classesList", ""));
+		startActivityForResult(intent, CLASSES_LIST);;
 	}
 	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
-		if(resultCode == RESULT_OK){
+		if(resultCode == RESULT_OK) {
+			Editor e = sharedPrefs.edit();
+			
 			if(requestCode == CLASSES_LIST){
-				String classesString =  data.getStringExtra("classesList");
-				String[] classesList = classesString.replace("[", "").replace("]", "").split(",");
+				String allClassesString =  data.getStringExtra("classesList");
+				e.putString("classesList", allClassesString);
 				
-				final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-				Editor e = sharedPrefs.edit();
-				e.putString("classesList", classesString);
-				e.apply();
-								
-				ListView lv = getListView();
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,classesList);
+				selectedClasses = TClass.fromSharedPreferences(allClassesString.split(",")); 
+				ArrayAdapter<TClass> adapter = new NormalListCustomTextArrayAdapter<TClass>(
+												  this,
+												  android.R.layout.simple_list_item_1,
+												  selectedClasses.toArray(new TClass[selectedClasses.size()])
+											  );
 				lv.setAdapter(adapter);
-				
+			} else if(requestCode == SEMESTERS_LIST) {
+				String str = data.getStringExtra("semester");
+				e.putString("currentSemester", str);
 			}
+			e.apply();
 		}
 	}	
+	
 }
+//String.format("http://thoth.cc.e.ipl.pt/classes/%s/%s/%s/info", info[0], info[1], info[2]);

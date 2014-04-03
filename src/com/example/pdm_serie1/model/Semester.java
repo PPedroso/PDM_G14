@@ -3,7 +3,7 @@ package com.example.pdm_serie1.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Semester implements IModelItem {
+public class Semester implements IModelItem<Semester> {
 
 	private final int lectiveSemesterId;
 	private final String shortName;
@@ -44,6 +44,11 @@ public class Semester implements IModelItem {
 						    jsonObj.getInt("startYear"),
 						    jsonObj.getInt("term"),
 						    jsonObj.getString("termName"));
+	}
+	
+	@Override
+	public boolean representsSameItem(Semester sem) {
+		return this.lectiveSemesterId == sem.getLectiveSemesterId();
 	}
 	
 	//----------------------- getters --------------------------------
