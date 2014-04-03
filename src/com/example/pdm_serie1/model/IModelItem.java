@@ -6,5 +6,4 @@ public interface IModelItem<T> {
 	String toSharedPreferencesString();
 	boolean representsSameItem(T t);
 	
-	
 }

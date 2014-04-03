@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 
 import com.example.pdm_serie1.model.IModelItem;
 
-public abstract class CustomTextArrayAdapter<T extends IModelItem> extends ArrayAdapter<T> {
+public abstract class CustomTextArrayAdapter<T extends IModelItem<T>> extends ArrayAdapter<T> {
 
 	protected T[] data;
 	private final LayoutInflater inflater;

@@ -12,9 +12,9 @@ import com.example.pdm_serie1.model.IModelItem;
 public abstract class CheckedListCustomInitAndTextArrayAdapter<T extends IModelItem<T>> extends ArrayAdapter<T> {
 
 	protected T[] data;
-	private final LayoutInflater inflater;
+	protected final LayoutInflater inflater;
 	private final Iterable<T> initialData;
-	private final int resource;
+	protected final int resource;
 	
 	public CheckedListCustomInitAndTextArrayAdapter(Context context, int resource, T[] data, 
 												    Iterable<T> initialData) {
@@ -27,11 +27,8 @@ public abstract class CheckedListCustomInitAndTextArrayAdapter<T extends IModelI
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		View view = convertView;
-		if(view == null) {
-			view = inflater.inflate(resource, parent, false);
-		}
-		if(verifyIfStartsChecked(getItem(position))) {
+		View view = inflateViews(position, convertView, parent);
+		if(initialData != null && verifyIfStartsChecked(getItem(position))) {
 			((ListView)parent).setItemChecked(position, true);
 		}
 		changeText(position, view);
@@ -48,4 +45,12 @@ public abstract class CheckedListCustomInitAndTextArrayAdapter<T extends IModelI
 	}
 
 	protected abstract void changeText(int position, View view);
+	
+	protected View inflateViews(int position, View convertView, ViewGroup parent) {
+		View view = convertView;
+		if(view == null) {
+			view = inflater.inflate(resource, parent, false);
+		}
+		return view;
+	}
 }

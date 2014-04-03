@@ -93,7 +93,7 @@ public class TClass implements IModelItem<TClass> {
 		return fullName;
 	}
 	
-	public String getCourseUnirShortName() {
+	public String getCourseUnitShortName() {
 		return courseUnitShortName;
 	}
 	

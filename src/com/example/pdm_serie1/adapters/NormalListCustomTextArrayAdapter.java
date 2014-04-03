@@ -6,7 +6,7 @@ import android.widget.TextView;
 
 import com.example.pdm_serie1.model.IModelItem;
 
-public class NormalListCustomTextArrayAdapter<T extends IModelItem<?>> extends CustomTextArrayAdapter<T>{
+public class NormalListCustomTextArrayAdapter<T extends IModelItem<T>> extends CustomTextArrayAdapter<T>{
 
 	public NormalListCustomTextArrayAdapter(Context context, int resource, T[] data) {
 		super(context, resource, data);

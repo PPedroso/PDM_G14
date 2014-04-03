@@ -36,6 +36,7 @@ public class SemestersActivity extends ListActivity {
 		setContentView(R.layout.activity_semesters);
 		
 		list = getListView();
+		
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

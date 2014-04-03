@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,7 +27,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.pdm_serie1.adapters.CheckedListCustomInitAndTextArrayAdapter;
-import com.example.pdm_serie1.adapters.NormalListCustomTextArrayAdapter;
 import com.example.pdm_serie1.asynctaskrelated.BasicAsyncTaskResult;
 import com.example.pdm_serie1.asynctaskrelated.IAsyncTaskResult;
 import com.example.pdm_serie1.exceptions.MyHttpException;
@@ -45,14 +43,13 @@ public class SemesterClassesActivity extends ListActivity {
 	private ListView listView;
 	private List<TClass> selectedClasses = new LinkedList<TClass>();
 	private List<TClass> initialClasses;
-	private Button confirmButton;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_semesterclasses);
 		
-		confirmButton = (Button)findViewById(R.id.confirmButton);
+		final Button confirmButton = (Button)findViewById(R.id.confirmButton);
 		String initialClassesStr = getIntent().getStringExtra("initialClasses");
 		
 		if(!initialClassesStr.equals("")) {
@@ -138,10 +135,17 @@ public class SemesterClassesActivity extends ListActivity {
 				ProgressBar pb = (ProgressBar)findViewById(R.id.SemesterClassesActivity_ProgressBar);
 				pb.setVisibility(View.GONE);
 				List<TClass> result = taskResult.getResult();
-				ArrayAdapter<TClass> adapter = getClassAdapter(
-														act, 
-												   	    android.R.layout.simple_list_item_multiple_choice, 
-													    result.toArray(new TClass[result.size()]));
+				ArrayAdapter<TClass> adapter = 
+						new CheckedListCustomInitAndTextArrayAdapter<TClass>(act, 
+												  android.R.layout.simple_list_item_multiple_choice, 
+												  result.toArray(new TClass[result.size()]),
+												  initialClasses) {
+								@Override
+								protected void changeText(int position, View view) {
+									CheckedTextView textView = (CheckedTextView) view.findViewById(android.R.id.text1);
+									textView.setText(data[position].toListItemString());
+								}					
+				};
 				listView.setAdapter(adapter);				
 			}
 		}.execute();
@@ -153,23 +157,5 @@ public class SemesterClassesActivity extends ListActivity {
 		intent.putExtra("classesList", retStr);
 		setResult(RESULT_OK, intent);
 		finish();
-	}
-	
-	private ArrayAdapter<TClass> getClassAdapter(Context ctx, int resource, TClass[] data) {
-		if(initialClasses == null) {
-			return new NormalListCustomTextArrayAdapter<TClass>(ctx, resource, data);
-		}
-		return new CheckedListCustomInitAndTextArrayAdapter<TClass>(
-														 ctx, 
-													     android.R.layout.simple_list_item_multiple_choice, 
-													     data,
-													     initialClasses
-													 ) {
-				@Override
-				protected void changeText(int position, View view) {
-					CheckedTextView textView = (CheckedTextView) view.findViewById(android.R.id.text1);
-					textView.setText(data[position].toListItemString());									
-			}
-		};
 	}
 }
