@@ -79,8 +79,7 @@ public class MainActivity extends ListActivity {
 	/**
 	 * Construct the URI and call the browser
 	 */
-	private void showClassInfo(String[] info){
-		String uri = ("http://thoth.cc.e.ipl.pt/classes/" + info[0] + "/" + info[1] + "/" + info[2] + "/info").replace(" ", "");
+	private void showClassInfo(String uri){
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(uri));
 		startActivity(intent);
@@ -88,34 +87,46 @@ public class MainActivity extends ListActivity {
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		AdapterView.AdapterContextMenuInfo acmi;
-		switch (item.getItemId()) {		
+		
+		ListView lv;
+		switch (item.getItemId()) {
+		
 			//Show class homepage
-			case MENU_CLASS_INFO: {
-		    	acmi = (AdapterContextMenuInfo) info;
-		    	String[] s = lv.getItemAtPosition(acmi.position).toString().split("/");
-		    	showClassInfo(s);
+			case MENU_CLASS_INFO:
+		        
+		    	showClassInfo(getClassUri(item) + "/info");
 		        
 		        return true;
-			}
+		    
 		    //Show assignment list for the specified class
-			case MENU_ASSIGNMENTS: {
-		    	acmi= (AdapterContextMenuInfo) info;
+			case MENU_ASSIGNMENTS:
+				lv = getListView();
+		    	acmi= (AdapterContextMenuInfo) item.getMenuInfo();
 		    	String classId = lv.getItemAtPosition(acmi.position).toString();
 		    	classId = classId.substring(0,classId.indexOf(":")).replace(" ", "");
-		    	launchAssignmentActivity(classId);				
+		    	launchAssignmentActivity(classId, getClassUri(item));
+				
 		        return true;
-			}
-		    default: {
+		    default:
 		        return super.onContextItemSelected(item);
-		    }
-	   }
+		}
 	}
 	
-	public void launchAssignmentActivity(String classId){
+	//Retorna o URI base para a turma (cadeira+semestre)
+	private String getClassUri(MenuItem item){
+		ListView lv = getListView();
+		AdapterView.AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
+		String[] info = lv.getItemAtPosition(acmi.position).toString().split("/");
+		String uri = ("http://thoth.cc.e.ipl.pt/classes/" + info[0].split(":")[1] + "/" + info[1] + "/" + info[2]).replace(" ", "");
+		
+		return uri;
+	}
+	
+	public void launchAssignmentActivity(String classId, String uri){
 		Intent intent = new Intent(MainActivity.this,AssignmentActivity.class);
 		intent.putExtra("classId",classId);
+		intent.putExtra("classUri", uri);
 		startActivity(intent);
 	}
 	
