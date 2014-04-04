@@ -42,7 +42,7 @@ public class MainActivity extends ListActivity {
 			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
 									this,
 									android.R.layout.simple_list_item_1,
-									sharedPrefs.getString("classesList", "").replace("[", "").replace("]", "").split(",")
+									sharedPrefs.getString("classesList", "").split(",")
 									);
 			lv.setAdapter(adapter);
 		}
@@ -128,7 +128,7 @@ public class MainActivity extends ListActivity {
 		if(resultCode == RESULT_OK){
 			if(requestCode == CLASSES_LIST){
 				String classesString =  data.getStringExtra("classesList");
-				String[] classesList = classesString.replace("[", "").replace("]", "").split(",");
+				String[] classesList = classesString.split(",");
 				
 				final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 				Editor e = sharedPrefs.edit();

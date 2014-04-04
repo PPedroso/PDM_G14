@@ -134,17 +134,19 @@ public class SemesterClassesActivity extends Activity {
 	public void confirmSelection(View view){
 		ListView lv = (ListView)findViewById(R.id.SemesterClasses_classList);
 		SparseBooleanArray a = lv.getCheckedItemPositions();
-		LinkedList<String> resultList = new LinkedList<String>();
+		StringBuilder sb = new StringBuilder();
+		
 		int resultCount = lv.getAdapter().getCount();
 		
 		for(int i=0; i<resultCount ;++i){
 			if(a.get(i)){
-				resultList.add(lv.getItemAtPosition(i).toString());
+				String str = lv.getItemAtPosition(i).toString().trim();
+				sb.append(str).append(",");
 			}
 		}
 
 		Intent intent = new Intent();
-		intent.putExtra("classesList",resultList.toString());
+		intent.putExtra("classesList",sb.toString());
 		setResult(RESULT_OK,intent);
 		finish();
 	}

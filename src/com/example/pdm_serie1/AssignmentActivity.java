@@ -86,7 +86,7 @@ public class AssignmentActivity extends Activity {
 			@Override
 			protected void onPostExecute(LinkedList<String> result){								
 				ListView lv = (ListView)findViewById(android.R.id.list);
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(act,android.R.layout.simple_list_item_multiple_choice,result.toArray(new String[] {}));
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(AssignmentActivity.this,android.R.layout.simple_list_item_multiple_choice,result.toArray(new String[] {}));
 				lv.setAdapter(adapter);
 			}
 		}.execute();
