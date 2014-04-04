@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:text="@string/Confirm"
+        android:text="@string/confirm"
         android:onClick="confirmSelection" />
 
 </RelativeLayout>
