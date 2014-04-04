@@ -12,5 +12,7 @@
     <string name="text_semesters">Semesters</string>
     <string name="title_activity_semester_classes">SemesterClassesActivity</string>
     <string name="title_activity_assignment">AssignmentActivity</string>
+    <string name="dueDateString">Data de Entrega:</string>
+    <string name="confirm">Confirm</string>
 
 </resources>

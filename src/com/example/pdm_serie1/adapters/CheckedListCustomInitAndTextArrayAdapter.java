@@ -1,0 +1,56 @@
+package com.example.pdm_serie1.adapters;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import com.example.pdm_serie1.model.IModelItem;
+
+public abstract class CheckedListCustomInitAndTextArrayAdapter<T extends IModelItem<T>> extends ArrayAdapter<T> {
+
+	protected T[] data;
+	protected final LayoutInflater inflater;
+	private final Iterable<T> initialData;
+	protected final int resource;
+	
+	public CheckedListCustomInitAndTextArrayAdapter(Context context, int resource, T[] data, 
+												    Iterable<T> initialData) {
+		super(context, resource, data);
+		this.data = data;
+		this.resource = resource;
+		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		this.initialData = initialData;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View view = inflateViews(position, convertView, parent);
+		if(initialData != null && verifyIfStartsChecked(getItem(position))) {
+			((ListView)parent).setItemChecked(position, true);
+		}
+		changeText(position, view);
+		return view;
+	}
+	
+	private boolean verifyIfStartsChecked(T currentT) {
+		for(T t : initialData) {
+			if(t.representsSameItem(currentT)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected abstract void changeText(int position, View view);
+	
+	protected View inflateViews(int position, View convertView, ViewGroup parent) {
+		View view = convertView;
+		if(view == null) {
+			view = inflater.inflate(resource, parent, false);
+		}
+		return view;
+	}
+}

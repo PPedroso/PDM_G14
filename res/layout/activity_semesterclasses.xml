@@ -33,12 +33,11 @@
         android:text="" />
 
     <ListView
-        android:id="@+id/SemesterClasses_classList"
+        android:id="@+id/@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/textView2"
-        android:layout_marginTop="20dp"
+        android:layout_below="@+id/confirmButton"
         android:choiceMode="multipleChoice" >
 
     </ListView>
@@ -57,7 +56,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:text="Confirm"
+        android:text="@string/confirm"
         android:onClick="confirmSelection" />
 
 </RelativeLayout>

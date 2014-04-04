@@ -1,96 +1,55 @@
 package com.example.pdm_serie1;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.LinkedList;
+import java.text.ParseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
+
+import com.example.pdm_serie1.adapters.NormalListCustomTextArrayAdapter;
+import com.example.pdm_serie1.asynctaskrelated.BasicAsyncTaskResult;
+import com.example.pdm_serie1.asynctaskrelated.IAsyncTaskResult;
+import com.example.pdm_serie1.asynctaskrelated.JsonHttpRequestAsyncTask;
+import com.example.pdm_serie1.exceptions.MyHttpException;
+import com.example.pdm_serie1.http.ThothEndPoints;
+import com.example.pdm_serie1.http.exectypes.JsonObjectHttpExecuter;
+import com.example.pdm_serie1.model.Assignment;
 
 public class AssignmentActivity extends Activity {
 	
-	AsyncTask<String, Integer, LinkedList<String>> a;
-	final Activity act = this;
+	private String classUri;
+	private ListView lv;
 	
-	private String THOTH_API = "http://thoth.cc.e.ipl.pt/api/v1";
-
+	private final int ASSIGNMENT_PAGE = 0;
+	private final int ASSIGNMENT_SCHEDULE = 1;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_assignment);
-		Intent intent = getIntent();
-		String classId = intent.getStringExtra("classId");
-		getAssignmentInfo(classId);
-	}
-
-	private void getAssignmentInfo(final String classId){
-		a = new AsyncTask<String, Integer, LinkedList<String>>(){
-			@Override
-			protected LinkedList<String> doInBackground(String ... params){
-				try {
-					
-					URL url = new URL(THOTH_API+"/classes/" + classId + "/workitems");
-					InputStream is = url.openStream();
-											
-					BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-				    
-					StringBuilder sb = new StringBuilder();
-				    int cp;
-				    while ((cp = rd.read()) != -1) {
-				      sb.append((char) cp);
-				    }
-				    
-				    is.close();
-				    rd.close();
-					
-				    JSONArray a = new JSONObject(sb.toString()).getJSONArray("workItems");
-					
-					
-					LinkedList<String> resultList = new LinkedList<String>();
-					
-					for(int i=0;i<a.length();++i){
-						resultList.add(((JSONObject)a.get(i)).get("title").toString());
-					}
-					
-					return resultList;
-				    
-				} catch (MalformedURLException e) {
-					Log.i("URL",e.getMessage());
-				} catch (IOException e) {
-					Log.i("IO", e.getMessage());
-				} catch (JSONException e) {
-					Log.i("JSON",e.getMessage());
-				} catch(Exception e){
-					Log.i("General Exception",e.getMessage());
-				}
-				return null;
-			}
-						
-			@Override
-			protected void onPostExecute(LinkedList<String> result){								
-				ListView lv = (ListView)findViewById(android.R.id.list);
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(AssignmentActivity.this,android.R.layout.simple_list_item_multiple_choice,result.toArray(new String[] {}));
-				lv.setAdapter(adapter);
-			}
-		}.execute();
 		
+		lv = (ListView)findViewById(android.R.id.list);
+		Intent intent 	= getIntent();
+		int classId 	= intent.getIntExtra("classId", 0);
+		this.classUri  	= intent.getStringExtra("classUri");
+		registerForContextMenu(findViewById(android.R.id.list));
+
+		getAssignmentInfo(classId);		
 	}
 	
 	@Override
@@ -100,4 +59,80 @@ public class AssignmentActivity extends Activity {
 		return true;
 	}
 
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {				
+		AdapterView.AdapterContextMenuInfo adapter = (AdapterContextMenuInfo) item.getMenuInfo();
+		Assignment assignment = (Assignment)lv.getItemAtPosition(adapter.position);
+		switch(item.getItemId()){
+			case ASSIGNMENT_PAGE:
+				showAssignmentPage(assignment);
+				return true;
+			case ASSIGNMENT_SCHEDULE:
+				scheduleAssignment(assignment);
+				return true;
+		}
+		return false;
+	}
+	
+	private void showAssignmentPage(Assignment assignment){
+		String workItemUri = String.format("%s/workItems/%s", classUri,assignment.getId());
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(workItemUri));
+		startActivity(intent);
+	}
+	
+	private void scheduleAssignment(Assignment assignment){			
+		Uri uri = Uri.parse("content://com.android.calendar/events");
+		Intent intent = new Intent(Intent.ACTION_INSERT, uri);
+		intent.putExtra("Events.TITLE", assignment.getTitle());
+		intent.putExtra("Events.DTSTART", assignment.getStartDate());
+		intent.putExtra("Events.DTEND", assignment.getDueDate());
+		startActivity(intent);
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo){
+		super.onCreateContextMenu(menu, v, menuInfo);
+		
+		int position = ((AdapterContextMenuInfo)menuInfo).position;		
+		Assignment assignment = (Assignment)lv.getItemAtPosition(position);
+		
+		menu.setHeaderTitle("Due Date: " + assignment.getDueDate()); //TODO: Store assignment due date
+		menu.add(0, ASSIGNMENT_PAGE, Menu.NONE, "Go to Page");
+		menu.add(0, ASSIGNMENT_SCHEDULE, Menu.NONE, "Schedule on calendar");
+	}
+	
+	private void getAssignmentInfo(final int classId){
+		new JsonHttpRequestAsyncTask<Void, Integer, Assignment[]>(this, "work items"){
+			@Override
+			protected IAsyncTaskResult<Assignment[]> actualBackgroundWork(Void... params) throws JSONException, MyHttpException {
+				JSONObject obj = new JsonObjectHttpExecuter()
+											.executeGet(ThothEndPoints.get().getClassWorkItems(classId), 
+														200);
+				JSONArray arrayObj = obj.getJSONArray("workItems");
+				Assignment[] arrayAssigment = new Assignment[arrayObj.length()];
+				try {
+					for(int i = 0; i < arrayAssigment.length; ++i) {
+						arrayAssigment[i] = Assignment.fromJSONObject(arrayObj.getJSONObject(i));
+					}
+					return new BasicAsyncTaskResult<Assignment[]>(arrayAssigment);
+				} catch (ParseException e) {
+					Log.e("HTTP", "The data format on work items has changed", e);
+					return new BasicAsyncTaskResult<Assignment[]>(e);
+				}
+			}
+
+			@Override
+			protected void actualPostExecuteWork(IAsyncTaskResult<Assignment[]> result) {
+				ArrayAdapter<Assignment> adapter 
+					= new NormalListCustomTextArrayAdapter<Assignment>(
+													ctx,
+													android.R.layout.simple_list_item_1,
+													result.getResult()
+												);
+				lv.setAdapter(adapter);
+			}
+		}.execute();
+	}
 }
