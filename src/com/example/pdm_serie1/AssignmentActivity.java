@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -83,11 +84,12 @@ public class AssignmentActivity extends Activity {
 	}
 	
 	private void scheduleAssignment(Assignment assignment){			
-		Uri uri = Uri.parse("content://com.android.calendar/events");
-		Intent intent = new Intent(Intent.ACTION_INSERT, uri);
-		intent.putExtra("Events.TITLE", assignment.getTitle());
-		intent.putExtra("Events.DTSTART", assignment.getStartDate());
-		intent.putExtra("Events.DTEND", assignment.getDueDate());
+		Intent intent = new Intent(Intent.ACTION_INSERT);
+		intent.setType("vnd.android.cursor.item/event");    
+		intent.putExtra(Events.TITLE, assignment.getTitle());
+		intent.putExtra(Events.DTSTART, assignment.getStartDate());
+		intent.putExtra(Events.DTEND, assignment.getDueDate());
+		intent.putExtra(Events.DESCRIPTION, String.format("%s", assignment.getTitle()));
 		startActivity(intent);
 	}
 	
@@ -98,7 +100,7 @@ public class AssignmentActivity extends Activity {
 		int position = ((AdapterContextMenuInfo)menuInfo).position;		
 		Assignment assignment = (Assignment)lv.getItemAtPosition(position);
 		
-		menu.setHeaderTitle("Due Date: " + assignment.getDueDate()); //TODO: Store assignment due date
+		menu.setHeaderTitle("Due Date: " + assignment.getDueDate());
 		menu.add(0, ASSIGNMENT_PAGE, Menu.NONE, "Go to Page");
 		menu.add(0, ASSIGNMENT_SCHEDULE, Menu.NONE, "Schedule on calendar");
 	}
