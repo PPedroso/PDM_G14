@@ -67,8 +67,8 @@ public class MainActivity extends ListActivity {
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, 
-	    ContextMenuInfo menuInfo) {
-		
+		ContextMenuInfo menuInfo) {
+			
 		//super.onCreateContextMenu(menu, v, menuInfo);    
 		getMenuInflater().inflate(R.menu.context_menu, menu);
 		menu.add(Menu.NONE, MENU_CLASS_INFO, Menu.NONE, "Info");
