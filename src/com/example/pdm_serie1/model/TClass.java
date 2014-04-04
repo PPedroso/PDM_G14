@@ -1,8 +1,5 @@
 package com.example.pdm_serie1.model;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,12 +43,12 @@ public class TClass implements IModelItem<TClass> {
 						  fields[5]);
 	}
 	
-	public static List<TClass> fromSharedPreferences(String[] strArray) {
-		LinkedList<TClass> retList = new LinkedList<TClass>();
-		for(String str : strArray) {
-			retList.addLast(fromSharedPreferences(str));
+	public static TClass[] fromSharedPreferences(String[] strArray) {
+		TClass[] retArray = new TClass[strArray.length];
+		for(int i = 0; i < retArray.length; ++i) {
+			retArray[i] = fromSharedPreferences(strArray[i]);
 		}
-		return retList;
+		return retArray;
 	}
 	
 	public static TClass fromJSONObject(JSONObject jsonObj) throws JSONException {

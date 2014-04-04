@@ -1,7 +1,5 @@
 package com.example.pdm_serie1;
 
-import java.util.List;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,9 +30,6 @@ public class MainActivity extends ListActivity {
 	private static final int MENU_CLASS_INFO = 0;
 	private static final int MENU_ASSIGNMENTS = 1;
 	
-	//list of selected classes
-	private List<TClass> selectedClasses;
-	
 	private ListView lv;
 	private SharedPreferences sharedPrefs;
 	
@@ -47,14 +42,7 @@ public class MainActivity extends ListActivity {
 		registerForContextMenu(lv);
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		if(sharedPrefs.contains("classesList")){
-			String[] classesAsStr = sharedPrefs.getString("classesList", "").split(",");
-			selectedClasses = TClass.fromSharedPreferences(classesAsStr);
-			ArrayAdapter<TClass> adapter = new NormalListCustomTextArrayAdapter<TClass>(
-										this,
-										android.R.layout.simple_list_item_1,
-										selectedClasses.toArray(new TClass[selectedClasses.size()])
-									);
-			lv.setAdapter(adapter);
+			addClassesToLayout(sharedPrefs.getString("classesList", ""));
 		}
 	}
 
@@ -87,43 +75,29 @@ public class MainActivity extends ListActivity {
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterView.AdapterContextMenuInfo acmi;
-		
-		ListView lv;
-		switch (item.getItemId()) {
-		
+		AdapterView.AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();		
+		TClass thothClass = (TClass)lv.getItemAtPosition(acmi.position);		
+		String baseClassUrl = String.format("http://thoth.cc.e.ipl.pt/classes/%s/%s/%s", 
+								thothClass.getCourseUnitShortName(), thothClass.getLectiveSemesterShortName(),
+								thothClass.getClassName());
+		switch (item.getItemId()) {		
 			//Show class homepage
-			case MENU_CLASS_INFO:
-		        
-		    	showClassInfo(getClassUri(item) + "/info");
-		        
+			case MENU_CLASS_INFO: {		    
+		    	showClassInfo(String.format("%s/info", baseClassUrl));		        
 		        return true;
-		    
+			}
 		    //Show assignment list for the specified class
-			case MENU_ASSIGNMENTS:
-				lv = getListView();
-		    	acmi= (AdapterContextMenuInfo) item.getMenuInfo();
-		    	String classId = lv.getItemAtPosition(acmi.position).toString();
-		    	classId = classId.substring(0,classId.indexOf(":")).replace(" ", "");
-		    	launchAssignmentActivity(classId, getClassUri(item));
-				
+			case MENU_ASSIGNMENTS: {
+		    	launchAssignmentActivity(thothClass.getId(), baseClassUrl);
 		        return true;
-		    default:
+			}
+		    default: {
 		        return super.onContextItemSelected(item);
+		    }
 		}
 	}
 	
-	//Retorna o URI base para a turma (cadeira+semestre)
-	private String getClassUri(MenuItem item){
-		ListView lv = getListView();
-		AdapterView.AdapterContextMenuInfo acmi = (AdapterContextMenuInfo) item.getMenuInfo();
-		String[] info = lv.getItemAtPosition(acmi.position).toString().split("/");
-		String uri = ("http://thoth.cc.e.ipl.pt/classes/" + info[0].split(":")[1] + "/" + info[1] + "/" + info[2]).replace(" ", "");
-		
-		return uri;
-	}
-	
-	public void launchAssignmentActivity(String classId, String uri){
+	public void launchAssignmentActivity(int classId, String uri){
 		Intent intent = new Intent(MainActivity.this,AssignmentActivity.class);
 		intent.putExtra("classId",classId);
 		intent.putExtra("classUri", uri);
@@ -145,18 +119,10 @@ public class MainActivity extends ListActivity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data){
 		if(resultCode == RESULT_OK) {
 			Editor e = sharedPrefs.edit();
-			
 			if(requestCode == CLASSES_LIST){
 				String allClassesString =  data.getStringExtra("classesList");
 				e.putString("classesList", allClassesString);
-				
-				selectedClasses = TClass.fromSharedPreferences(allClassesString.split(",")); 
-				ArrayAdapter<TClass> adapter = new NormalListCustomTextArrayAdapter<TClass>(
-												  this,
-												  android.R.layout.simple_list_item_1,
-												  selectedClasses.toArray(new TClass[selectedClasses.size()])
-											  );
-				lv.setAdapter(adapter);
+				addClassesToLayout(allClassesString);
 			} else if(requestCode == SEMESTERS_LIST) {
 				String str = data.getStringExtra("semester");
 				e.putString("currentSemester", str);
@@ -165,5 +131,15 @@ public class MainActivity extends ListActivity {
 		}
 	}	
 	
+	private void addClassesToLayout(String allClassesStr) {
+		String[] classesAsStr = allClassesStr.split(",");
+		TClass[] arrayClasses = TClass.fromSharedPreferences(classesAsStr);			
+		ArrayAdapter<TClass> adapter = new NormalListCustomTextArrayAdapter<TClass>(
+									this,
+									android.R.layout.simple_list_item_1,
+									arrayClasses
+								);
+		lv.setAdapter(adapter);
+	}
+	
 }
-//String.format("http://thoth.cc.e.ipl.pt/classes/%s/%s/%s/info", info[0], info[1], info[2]);
