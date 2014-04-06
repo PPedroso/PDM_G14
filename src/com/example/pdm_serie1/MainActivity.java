@@ -41,6 +41,7 @@ public class MainActivity extends ListActivity {
 		lv = getListView();
 		registerForContextMenu(lv);
 		sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		
 		if(sharedPrefs.contains("classesList")){
 			addClassesToLayout(sharedPrefs.getString("classesList", ""));
 		}

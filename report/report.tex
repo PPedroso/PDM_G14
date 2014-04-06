@@ -4,7 +4,7 @@
 \begin{document}
 
 \title{Relatório do primeiro trabalho de PDM}
-\author{David Raposo \and Pedro Pedroso \and Ricardo Mata}
+\author{David Raposo nº-----\and Pedro Pedroso nº32632 \and Ricardo Mata nº-----}
 
 \maketitle
 
@@ -17,6 +17,49 @@ informação extraída a partir da API do Thoth \footnote{http://thoth.cc.e.ipl.
 \subsection{Classes}
 As classes que criámos foram maioritáriamente activities. O Eclipse ADT gera automáticamente as activities criadas com um modo de design (ficheiro XML)
 localizado em /res/layout, e um ficheiro com extensão java localizado em /src/com/example/pdm\_serie1.
+
+\subsection{Estrutura}
+Utilizamos uma estrutura simples para este projecto.
+
+MainActivity(Mostra a lista das turmas escolhidas) 	
+		SemestersActivity(Mostra a lista de semestres)
+		SemesterClassesActivity(Mostra a lista de turmas do semestre escolhido)
+		
+		----ContextMenu-----
+		ClassInfo(Abre o browser na pagina inicial da turma selecionada)
+		AssignmentActivty
+					----ContextMenu----
+					AssignmentPage(Abre o browser na pagina do trabalho selecionado)
+					AssignmentSchedule(Abre o calendário na edição de evento com as datas e titulos do trabalho selecionado)				
+					
+
+\section{Componentes}
+
+\subsection{Adapter}
+
+David, explica aqui as alterações que fizeste em relação ao adapter sff
+
+\subsection{Menu de contexto}
+O menu de contexto é utilizado nas List Views que têm escolhas (como é o caso da list view de turmas e a list view de trabalhos). É acedido ao pressionar num item da respectiva list view durante um segundo.
+Este componente para ser usado é primeiro necessário registar a view que o vai usar. Portanto no onCreate da Activity onde se encontra o menu é chamada a função registerForContextMenu(getListView()).
+O menu de contexto pode ser criado através do xml ou de código no onCreateContextMenu. Nós ao adicionar cada item, adicionamos também a tag que é usada para identificar qual dos items foi selecionado na função
+onCreateContextMenu. Nesta função recebemos o objecto item como parametro que tem a informação relativamente ao item que foi selecionado. Através deste objecto, identificamos o item pressionada e 
+chamados a função correspondente.
+
+\subsection{Calendário}
+O calendário é usado para a marcação dos trabalhos. Através do menu de contexto presente na AssignmentActivity.class, é chamado o calendário criando um intent com os seguintes parametros:
+
+new Intent(Intent.ACTION_INSERT, "content://com.android.calendar/events").
+intent.putExtra(Events.TITLE, "Titulo do evento");
+intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, "Data do inicio do evento");
+intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, "Data do fim do evento");
+intent.putExtra(Events.DESCRIPTION, "Descrição do evento");
+
+Internamente, é chamada uma activity que processa o uri e utiliza os campos passados dentro do extra do intent para criar um evento no calendário do android.
+
+\subsection{Shared Preferences}
+É uma class que guarda informação que lhe é submetido. Esta informação mantêm-se guardada mesmo que a aplicação seja desligada. Usamos esta class para guardar  a lista de turmas que o utilizador selecionou
+e também o semestre para evitar que seja preciso fazer uma query para recuperar a informação sempre ligue a aplicação.
 
 \section{Conclusion}
 Write your conclusion here.

@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -84,11 +85,11 @@ public class AssignmentActivity extends Activity {
 	}
 	
 	private void scheduleAssignment(Assignment assignment){			
-		Intent intent = new Intent(Intent.ACTION_INSERT);
-		intent.setType("vnd.android.cursor.item/event");    
+		Uri uri = Uri.parse("content://com.android.calendar/events");
+		Intent intent = new Intent(Intent.ACTION_INSERT,uri);
 		intent.putExtra(Events.TITLE, assignment.getTitle());
-		intent.putExtra(Events.DTSTART, assignment.getStartDate());
-		intent.putExtra(Events.DTEND, assignment.getDueDate());
+		intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, assignment.getStartDate().getTime());
+		intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, assignment.getDueDate().getTime());
 		intent.putExtra(Events.DESCRIPTION, String.format("%s", assignment.getTitle()));
 		startActivity(intent);
 	}
