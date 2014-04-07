@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.example.pdm_serie1.adapters.NormalListCustomTextArrayAdapter;
 import com.example.pdm_serie1.asynctaskrelated.BasicAsyncTaskResult;
@@ -128,6 +129,8 @@ public class AssignmentActivity extends Activity {
 
 			@Override
 			protected void actualPostExecuteWork(IAsyncTaskResult<Assignment[]> result) {
+				ProgressBar pb = (ProgressBar)findViewById(R.id.AssignmentActivity_ProgressBar);
+				pb.setVisibility(View.GONE);
 				ArrayAdapter<Assignment> adapter 
 					= new NormalListCustomTextArrayAdapter<Assignment>(
 													ctx,
