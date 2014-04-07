@@ -1,10 +1,46 @@
 \documentclass{article}
 \RequirePackage[utf8]{inputenc}
 \usepackage[portuguese]{babel}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3,
+  literate=
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\'e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\EUR}}1 {£}{{\pounds}}1
+}
+
 \begin{document}
 
 \title{Relatório do primeiro trabalho de PDM}
-\author{David Raposo nº-----\and Pedro Pedroso nº32632 \and Ricardo Mata nº-----}
+\author{David Raposo nº33724\and Pedro Pedroso nº32632 \and Ricardo Mata nº33404}
 
 \maketitle
 
@@ -19,18 +55,25 @@ As classes que criámos foram maioritáriamente activities. O Eclipse ADT gera a
 localizado em /res/layout, e um ficheiro com extensão java localizado em /src/com/example/pdm\_serie1.
 
 \subsection{Estrutura}
-Utilizamos uma estrutura simples para este projecto.
+Utilizámos uma estrutura simples para este projecto:
 
-MainActivity(Mostra a lista das turmas escolhidas) 	
-		SemestersActivity(Mostra a lista de semestres)
-		SemesterClassesActivity(Mostra a lista de turmas do semestre escolhido)
-		
-		----ContextMenu-----
-		ClassInfo(Abre o browser na pagina inicial da turma selecionada)
-		AssignmentActivty
-					----ContextMenu----
-					AssignmentPage(Abre o browser na pagina do trabalho selecionado)
-					AssignmentSchedule(Abre o calendário na edição de evento com as datas e titulos do trabalho selecionado)				
+\begin{description}
+	\item[MainActivity] Mostra a lista das turmas escolhidas
+		\begin{description}
+			\item[SemestersActivity] Mostra a lista de semestres
+			\item[SemesterClassesActivity] Mostra a lista de turmas do semestre escolhido
+			\item[ContextMenu] Menu de contexto sobre a lista
+			\begin{description}			
+				\item[ClassInfo] Abre o browser na pagina inicial da turma selecionada
+				\item[AssignmentActivity] Mostra os trabalhos dessa turma
+				\item[ContextMenu] Menu de contexto sobre a lista
+				\begin{description}											
+					\item[AssignmentPage] Abre o browser na pagina do trabalho selecionado
+					\item[AssignmentSchedule] Abre o calendário na edição de evento com as datas e titulos do trabalho selecionado
+				\end{description}
+			\end{description}
+		\end{description}
+\end{description}
 					
 
 \section{Componentes}
@@ -49,19 +92,18 @@ chamados a função correspondente.
 \subsection{Calendário}
 O calendário é usado para a marcação dos trabalhos. Através do menu de contexto presente na AssignmentActivity.class, é chamado o calendário criando um intent com os seguintes parametros:
 
+\begin{lstlisting}
 new Intent(Intent.ACTION_INSERT, "content://com.android.calendar/events").
 intent.putExtra(Events.TITLE, "Titulo do evento");
 intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, "Data do inicio do evento");
 intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, "Data do fim do evento");
-intent.putExtra(Events.DESCRIPTION, "Descrição do evento");
-
+intent.putExtra(Events.DESCRIPTION, "Descritivo do evento");
+\end{lstlisting}
 Internamente, é chamada uma activity que processa o uri e utiliza os campos passados dentro do extra do intent para criar um evento no calendário do android.
 
 \subsection{Shared Preferences}
 É uma class que guarda informação que lhe é submetido. Esta informação mantêm-se guardada mesmo que a aplicação seja desligada. Usamos esta class para guardar  a lista de turmas que o utilizador selecionou
 e também o semestre para evitar que seja preciso fazer uma query para recuperar a informação sempre ligue a aplicação.
 
-\section{Conclusion}
-Write your conclusion here.
 
 \end{document}
