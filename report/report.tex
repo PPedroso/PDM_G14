@@ -78,9 +78,11 @@ Utilizámos uma estrutura simples para este projecto:
 
 \section{Componentes}
 
-\subsection{Adapter}
+\subsection{Adapters}
+Foi adicionado às classes modelo, um método que define a forma como estes defem ser representado gráficamente. Os Adapters criados apenas tiram partido desta funcionalidade, em vez do toString() de default.
 
-David, explica aqui as alterações que fizeste em relação ao adapter sff
+\subsection{AsyncTask e HttpExecutors}
+Tendo em conta a repetição de pedidos semelhantes (sempre GET's a retornar JSON), foram adicionadas as classes necessárias para tratar do pedido e respectivo tratamento de excepções.
 
 \subsection{Menu de contexto}
 O menu de contexto é utilizado nas List Views que têm escolhas (como é o caso da list view de turmas e a list view de trabalhos). É acedido ao pressionar num item da respectiva list view durante um segundo.
